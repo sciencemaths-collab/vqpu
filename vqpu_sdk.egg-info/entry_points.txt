@@ -1,0 +1,2 @@
+[console_scripts]
+vqpu = vqpu.__main__:main

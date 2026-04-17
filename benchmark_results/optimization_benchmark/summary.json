@@ -1,0 +1,452 @@
+{
+  "problem": "weighted_maxcut_qaoa",
+  "instance": {
+    "n_qubits": 10,
+    "degree": 3,
+    "n_edges": 15,
+    "edges": [
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        0,
+        8
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        1,
+        9
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        7
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        4,
+        6
+      ],
+      [
+        4,
+        7
+      ],
+      [
+        4,
+        9
+      ],
+      [
+        5,
+        6
+      ],
+      [
+        5,
+        9
+      ],
+      [
+        6,
+        8
+      ],
+      [
+        7,
+        8
+      ]
+    ],
+    "weights": [
+      1.5,
+      1.5,
+      4.0,
+      2.5,
+      3.0,
+      3.0,
+      3.5,
+      1.0,
+      2.5,
+      1.5,
+      2.5,
+      4.5,
+      3.0,
+      1.0,
+      3.0
+    ]
+  },
+  "brute_force": {
+    "best_state": "0110110010",
+    "best_cost": 34.0,
+    "time_s": 0.004560082976240665,
+    "partition_left": [
+      0,
+      3,
+      6,
+      7,
+      9
+    ],
+    "partition_right": [
+      1,
+      2,
+      4,
+      5,
+      8
+    ]
+  },
+  "optimization": {
+    "best_state": "0110110010",
+    "best_cost": 34.0,
+    "approximation_ratio": 1.0,
+    "time_s": 11.717883250035811,
+    "iterations": 16,
+    "shots": 2048,
+    "layers": 3,
+    "total_evaluations": 208,
+    "total_shots": 229376,
+    "avg_eval_time_s": 0.05631841049398645,
+    "circuit_depth": 7,
+    "gate_count": 43,
+    "partition_left": [
+      0,
+      3,
+      6,
+      7,
+      9
+    ],
+    "partition_right": [
+      1,
+      2,
+      4,
+      5,
+      8
+    ],
+    "history": [
+      {
+        "iter": 1,
+        "expected_cost": 18.40966796875,
+        "best_cost": 34.0,
+        "best_state": "0110110010",
+        "approximation_ratio": 1.0,
+        "iter_time_s": 0.6356674999697134,
+        "eval_time_s": 0.05613204196561128,
+        "grad_time_s": 0.5794006669311784,
+        "evaluations": 13,
+        "shots": 14336,
+        "circuit_depth": 7,
+        "gate_count": 43
+      },
+      {
+        "iter": 2,
+        "expected_cost": 24.299560546875,
+        "best_cost": 34.0,
+        "best_state": "0110110010",
+        "approximation_ratio": 1.0,
+        "iter_time_s": 0.628627541998867,
+        "eval_time_s": 0.04850029101362452,
+        "grad_time_s": 0.5800058351014741,
+        "evaluations": 13,
+        "shots": 14336,
+        "circuit_depth": 7,
+        "gate_count": 43
+      },
+      {
+        "iter": 3,
+        "expected_cost": 16.73486328125,
+        "best_cost": 34.0,
+        "best_state": "1001001101",
+        "approximation_ratio": 1.0,
+        "iter_time_s": 0.6415947920177132,
+        "eval_time_s": 0.04995420796331018,
+        "grad_time_s": 0.5914979170775041,
+        "evaluations": 13,
+        "shots": 14336,
+        "circuit_depth": 7,
+        "gate_count": 43
+      },
+      {
+        "iter": 4,
+        "expected_cost": 19.689453125,
+        "best_cost": 34.0,
+        "best_state": "1001001101",
+        "approximation_ratio": 1.0,
+        "iter_time_s": 0.6378826249856502,
+        "eval_time_s": 0.05019537499174476,
+        "grad_time_s": 0.5875320419436321,
+        "evaluations": 13,
+        "shots": 14336,
+        "circuit_depth": 7,
+        "gate_count": 43
+      },
+      {
+        "iter": 5,
+        "expected_cost": 20.975341796875,
+        "best_cost": 34.0,
+        "best_state": "0110110010",
+        "approximation_ratio": 1.0,
+        "iter_time_s": 0.6342569169937633,
+        "eval_time_s": 0.049809666990768164,
+        "grad_time_s": 0.5843117910553701,
+        "evaluations": 13,
+        "shots": 14336,
+        "circuit_depth": 7,
+        "gate_count": 43
+      },
+      {
+        "iter": 6,
+        "expected_cost": 19.381591796875,
+        "best_cost": 33.5,
+        "best_state": "1010001101",
+        "approximation_ratio": 0.9852941176470589,
+        "iter_time_s": 0.643943874980323,
+        "eval_time_s": 0.05046245799167082,
+        "grad_time_s": 0.5933410010766238,
+        "evaluations": 13,
+        "shots": 14336,
+        "circuit_depth": 7,
+        "gate_count": 43
+      },
+      {
+        "iter": 7,
+        "expected_cost": 20.06787109375,
+        "best_cost": 34.0,
+        "best_state": "1001001101",
+        "approximation_ratio": 1.0,
+        "iter_time_s": 0.6295468749594875,
+        "eval_time_s": 0.050627624965272844,
+        "grad_time_s": 0.5787864580051973,
+        "evaluations": 13,
+        "shots": 14336,
+        "circuit_depth": 7,
+        "gate_count": 43
+      },
+      {
+        "iter": 8,
+        "expected_cost": 19.697509765625,
+        "best_cost": 34.0,
+        "best_state": "1001001101",
+        "approximation_ratio": 1.0,
+        "iter_time_s": 0.6418513749958947,
+        "eval_time_s": 0.05012450000504032,
+        "grad_time_s": 0.5915837499196641,
+        "evaluations": 13,
+        "shots": 14336,
+        "circuit_depth": 7,
+        "gate_count": 43
+      },
+      {
+        "iter": 9,
+        "expected_cost": 18.385986328125,
+        "best_cost": 33.5,
+        "best_state": "1010001101",
+        "approximation_ratio": 0.9852941176470589,
+        "iter_time_s": 0.6321286670281552,
+        "eval_time_s": 0.05038204201264307,
+        "grad_time_s": 0.5816004580119625,
+        "evaluations": 13,
+        "shots": 14336,
+        "circuit_depth": 7,
+        "gate_count": 43
+      },
+      {
+        "iter": 10,
+        "expected_cost": 18.971923828125,
+        "best_cost": 33.5,
+        "best_state": "1010001101",
+        "approximation_ratio": 0.9852941176470589,
+        "iter_time_s": 0.6508874170249328,
+        "eval_time_s": 0.05025891697732732,
+        "grad_time_s": 0.6004187079379335,
+        "evaluations": 13,
+        "shots": 14336,
+        "circuit_depth": 7,
+        "gate_count": 43
+      },
+      {
+        "iter": 11,
+        "expected_cost": 13.93505859375,
+        "best_cost": 33.5,
+        "best_state": "0101110010",
+        "approximation_ratio": 0.9852941176470589,
+        "iter_time_s": 0.9261337090283632,
+        "eval_time_s": 0.05070379201788455,
+        "grad_time_s": 0.8751907089608721,
+        "evaluations": 13,
+        "shots": 14336,
+        "circuit_depth": 7,
+        "gate_count": 43
+      },
+      {
+        "iter": 12,
+        "expected_cost": 17.175537109375,
+        "best_cost": 34.0,
+        "best_state": "1001001101",
+        "approximation_ratio": 1.0,
+        "iter_time_s": 0.8905105000012554,
+        "eval_time_s": 0.06532487500226125,
+        "grad_time_s": 0.8249354169820435,
+        "evaluations": 13,
+        "shots": 14336,
+        "circuit_depth": 7,
+        "gate_count": 43
+      },
+      {
+        "iter": 13,
+        "expected_cost": 15.49462890625,
+        "best_cost": 34.0,
+        "best_state": "1001001101",
+        "approximation_ratio": 1.0,
+        "iter_time_s": 0.8744684580015019,
+        "eval_time_s": 0.07127445796504617,
+        "grad_time_s": 0.8029251679545268,
+        "evaluations": 13,
+        "shots": 14336,
+        "circuit_depth": 7,
+        "gate_count": 43
+      },
+      {
+        "iter": 14,
+        "expected_cost": 17.940185546875,
+        "best_cost": 34.0,
+        "best_state": "1001001101",
+        "approximation_ratio": 1.0,
+        "iter_time_s": 0.8825475839548744,
+        "eval_time_s": 0.07086883398005739,
+        "grad_time_s": 0.8114924998953938,
+        "evaluations": 13,
+        "shots": 14336,
+        "circuit_depth": 7,
+        "gate_count": 43
+      },
+      {
+        "iter": 15,
+        "expected_cost": 18.466064453125,
+        "best_cost": 34.0,
+        "best_state": "0110110010",
+        "approximation_ratio": 1.0,
+        "iter_time_s": 0.8843566249706782,
+        "eval_time_s": 0.0706568339955993,
+        "grad_time_s": 0.8134120019385591,
+        "evaluations": 13,
+        "shots": 14336,
+        "circuit_depth": 7,
+        "gate_count": 43
+      },
+      {
+        "iter": 16,
+        "expected_cost": 18.9091796875,
+        "best_cost": 33.5,
+        "best_state": "1010001101",
+        "approximation_ratio": 0.9852941176470589,
+        "iter_time_s": 0.8828462910023518,
+        "eval_time_s": 0.0708275840152055,
+        "grad_time_s": 0.8116914581041783,
+        "evaluations": 13,
+        "shots": 14336,
+        "circuit_depth": 7,
+        "gate_count": 43
+      }
+    ]
+  },
+  "scaling": {
+    "vqpu": [
+      {
+        "n_qubits": 4,
+        "n_edges": 6,
+        "gate_count": 19,
+        "depth": 7,
+        "median_eval_time_s": 0.003056541958358139,
+        "min_eval_time_s": 0.002761457988526672,
+        "max_eval_time_s": 0.0033164590131491423,
+        "shots_per_second": 670038.2418764863
+      },
+      {
+        "n_qubits": 6,
+        "n_edges": 9,
+        "gate_count": 27,
+        "depth": 7,
+        "median_eval_time_s": 0.0059057080070488155,
+        "min_eval_time_s": 0.004806375014595687,
+        "max_eval_time_s": 0.00630366598488763,
+        "shots_per_second": 346783.14565427037
+      },
+      {
+        "n_qubits": 8,
+        "n_edges": 12,
+        "gate_count": 35,
+        "depth": 7,
+        "median_eval_time_s": 0.015653249982278794,
+        "min_eval_time_s": 0.015338291006628424,
+        "max_eval_time_s": 0.0168037079856731,
+        "shots_per_second": 130835.44965541098
+      },
+      {
+        "n_qubits": 10,
+        "n_edges": 15,
+        "gate_count": 43,
+        "depth": 7,
+        "median_eval_time_s": 0.07037970901001245,
+        "min_eval_time_s": 0.06930908298818395,
+        "max_eval_time_s": 0.07289929100079462,
+        "shots_per_second": 29099.296214888367
+      }
+    ],
+    "universal": [
+      {
+        "n_qubits": 4,
+        "n_edges": 6,
+        "gate_count": 19,
+        "depth": 7,
+        "median_eval_time_s": 0.003652749990578741,
+        "min_eval_time_s": 0.003438832995016128,
+        "max_eval_time_s": 0.0044108330039307475,
+        "shots_per_second": 560673.4666435563
+      },
+      {
+        "n_qubits": 6,
+        "n_edges": 9,
+        "gate_count": 27,
+        "depth": 7,
+        "median_eval_time_s": 0.006591790996026248,
+        "min_eval_time_s": 0.0063433750183321536,
+        "max_eval_time_s": 0.006613083009142429,
+        "shots_per_second": 310689.462277339
+      },
+      {
+        "n_qubits": 8,
+        "n_edges": 12,
+        "gate_count": 35,
+        "depth": 7,
+        "median_eval_time_s": 0.017058792000170797,
+        "min_eval_time_s": 0.016618166002444923,
+        "max_eval_time_s": 0.017371291993185878,
+        "shots_per_second": 120055.3943080785
+      },
+      {
+        "n_qubits": 10,
+        "n_edges": 15,
+        "gate_count": 43,
+        "depth": 7,
+        "median_eval_time_s": 0.07228583400137722,
+        "min_eval_time_s": 0.06691066699568182,
+        "max_eval_time_s": 0.07241720898309723,
+        "shots_per_second": 28331.968888412914
+      }
+    ]
+  },
+  "artifacts": {
+    "instance_graph": "/Users/ramonahenry/Documents/vqpu/benchmark_results/optimization_benchmark/maxcut_instance.png",
+    "convergence_plot": "/Users/ramonahenry/Documents/vqpu/benchmark_results/optimization_benchmark/optimization_convergence.png",
+    "scaling_plot": "/Users/ramonahenry/Documents/vqpu/benchmark_results/optimization_benchmark/backend_scaling.png",
+    "summary_json": "/Users/ramonahenry/Documents/vqpu/benchmark_results/optimization_benchmark/summary.json"
+  }
+}

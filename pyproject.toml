@@ -1,0 +1,73 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vqpu-sdk"
+version = "0.4.3"
+description = "Universal quantum backend abstraction with circuit knitting and Cryo-Canonical Basin Weaving optimization."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Bernard Essuman", email = "bessuman.academia@gmail.com" },
+]
+keywords = [
+    "quantum computing", "quantum simulation", "backend abstraction",
+    "circuit knitting", "variational optimization", "QAOA", "VQE",
+    "quantum algorithms", "QPU", "GPU", "quantum compiler",
+]
+dependencies = [
+    "numpy>=1.22",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.urls]
+Homepage = "https://github.com/sciencemaths-collab/vqpu"
+Documentation = "https://github.com/sciencemaths-collab/vqpu#readme"
+Repository = "https://github.com/sciencemaths-collab/vqpu"
+Issues = "https://github.com/sciencemaths-collab/vqpu/issues"
+
+[project.optional-dependencies]
+# Hardware backends — install only what you have.
+cuda   = ["cupy-cuda12x"]
+cuda11 = ["cupy-cuda11x"]
+rocm   = ["cupy-rocm-5-0"]
+apple  = ["mlx"]
+intel  = ["torch", "intel-extension-for-pytorch"]
+tpu    = ["jax[tpu]"]
+
+# Cloud QPU SDKs.
+ibm     = ["qiskit", "qiskit-ibm-runtime"]
+ionq    = ["qiskit", "qiskit-ionq"]
+rigetti = ["pyquil"]
+google  = ["cirq-google"]
+azure   = ["azure-quantum"]
+aws     = ["amazon-braket-sdk"]
+
+# Convenience bundles.
+all-classical = ["vqpu-sdk[cuda]", "vqpu-sdk[apple]", "vqpu-sdk[intel]", "vqpu-sdk[tpu]"]
+all-qpu       = ["vqpu-sdk[ibm]", "vqpu-sdk[ionq]", "vqpu-sdk[rigetti]",
+                 "vqpu-sdk[google]", "vqpu-sdk[azure]", "vqpu-sdk[aws]"]
+
+[project.scripts]
+vqpu = "vqpu.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["vqpu*"]
+exclude = ["examples*", "_legacy*", "benchmark_results*"]
