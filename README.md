@@ -432,6 +432,12 @@ The CHESSO subsystem includes 685 test files covering gate operations, compilati
 
 ## Architecture
 
+<p align="center">
+  <img src="docs/images/vqpu-architecture.jpg" alt="vQPU architecture: circuit analysis, backend routing, reconstruction, and benchmarks" width="100%">
+</p>
+
+*End-to-end vQPU workflow: circuit analysis and partitioning, heterogeneous backend routing, reconstruction, and benchmark evaluation.*
+
 ```
 Your application
     |
