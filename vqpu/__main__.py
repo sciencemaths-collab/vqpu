@@ -1,9 +1,13 @@
 """vQPU command line interface."""
 
 import argparse
+import json
+from pathlib import Path
 
 import numpy as np
 
+from .accelerator_qualification import qualify as qualify_apple
+from .backend_catalog import discover_fabric
 from .universal import UniversalvQPU
 
 
@@ -11,9 +15,26 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="vQPU local quantum compute fabric")
     subparsers = parser.add_subparsers(dest="command")
     subparsers.add_parser("demo", help="run explicit local discovery and simulator demonstrations")
+    subparsers.add_parser("inventory", help="print the fail-closed RAD compute fabric inventory")
+    apple = subparsers.add_parser(
+        "qualify-apple", help="run the formal Apple Metal qualification benchmark"
+    )
+    apple.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if args.command is None:
         parser.print_help()
+        return
+    if args.command == "inventory":
+        print(json.dumps(discover_fabric(), sort_keys=True, separators=(",", ":")))
+        return
+    if args.command == "qualify-apple":
+        report = qualify_apple()
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(
+            json.dumps(report, sort_keys=True, separators=(",", ":")) + "\n", encoding="utf-8"
+        )
+        if report["qualification"] != "QUALIFIED_FOR_APPLE_METAL_FLOAT32_MATMUL":
+            raise SystemExit(1)
         return
     _demo()
 

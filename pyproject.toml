@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vqpu-sdk"
-version = "0.5.0"
-description = "Qualified local compute engine with vQPU quantum fabric."
+version = "0.6.0"
+description = "Qualified heterogeneous compute engine with vQPU quantum fabric."
 readme = "README.md"
 requires-python = ">=3.12,<3.15"
 license = "MIT"
@@ -28,9 +28,9 @@ classifiers = [
     "Intended Audience :: Education",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Physics",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -45,11 +45,11 @@ Issues = "https://github.com/sciencemaths-collab/vqpu/issues"
 [project.optional-dependencies]
 test = ["build>=1.3", "matplotlib>=3.7", "mypy>=1.18", "pip-audit>=2.9", "pytest>=8", "ruff>=0.13"]
 # Hardware backends — install only what you have.
-cuda   = ["cupy-cuda12x"]
-cuda11 = ["cupy-cuda11x"]
-rocm   = ["cupy-rocm-5-0; python_version < '3.14'"]
-apple  = ["mlx"]
-intel  = ["torch", "intel-extension-for-pytorch"]
+cuda   = ["cupy-cuda12x; sys_platform != 'darwin'"]
+cuda11 = ["cupy-cuda11x; sys_platform != 'darwin'"]
+rocm   = ["cupy-rocm-5-0; sys_platform == 'linux' and python_version < '3.14'"]
+apple  = ["mlx; sys_platform == 'darwin' and platform_machine == 'arm64'"]
+intel  = ["torch; sys_platform != 'darwin'", "intel-extension-for-pytorch; sys_platform == 'linux' and platform_machine == 'x86_64'"]
 tpu    = ["jax[tpu]"]
 
 # Cloud QPU SDKs.
@@ -59,11 +59,6 @@ rigetti = ["pyquil"]
 google  = ["cirq-google"]
 azure   = ["azure-quantum"]
 aws     = ["amazon-braket-sdk"]
-
-# Convenience bundles.
-all-classical = ["vqpu-sdk[cuda]", "vqpu-sdk[apple]", "vqpu-sdk[intel]", "vqpu-sdk[tpu]"]
-all-qpu       = ["vqpu-sdk[ibm]", "vqpu-sdk[ionq]", "vqpu-sdk[rigetti]",
-                 "vqpu-sdk[google]", "vqpu-sdk[azure]", "vqpu-sdk[aws]"]
 
 [project.scripts]
 vqpu = "vqpu.__main__:main"
@@ -90,5 +85,5 @@ select = ["E", "F", "I", "B", "UP", "S", "RUF"]
 [tool.mypy]
 python_version = "3.12"
 strict = true
-files = ["vqpu/compute_engine.py", "vqpu/qualification.py"]
+files = ["vqpu/compute_engine.py", "vqpu/qualification.py", "vqpu/accelerator_engine.py", "vqpu/accelerator_qualification.py"]
 follow_imports = "skip"

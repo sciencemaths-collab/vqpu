@@ -6,9 +6,9 @@ from pathlib import Path
 
 
 def main():
-    wheels = sorted(Path("dist").glob("vqpu_sdk-0.5.0-*.whl"))
+    wheels = sorted(Path("dist").glob("vqpu_sdk-0.6.0-*.whl"))
     if len(wheels) != 1:
-        raise SystemExit("exactly one vQPU 0.5.0 wheel is required")
+        raise SystemExit("exactly one vQPU 0.6.0 wheel is required")
     with tempfile.TemporaryDirectory() as directory:
         environment = Path(directory) / "venv"
         subprocess.run([sys.executable, "-m", "venv", str(environment)], check=True)
@@ -30,6 +30,16 @@ print(json.dumps({'verified':verify(r)['verified'],'shots':sum(r['counts'].value
             "backend": "cpu.quantum_simulator",
         }:
             raise SystemExit("clean-wheel acceptance failed")
+        inventory = subprocess.run(
+            [str(python), "-m", "vqpu", "inventory"], check=True, text=True, capture_output=True
+        )
+        document = json.loads(inventory.stdout)
+        if document["fallback_policy"] != "DENIED" or any(
+            item["routable"]
+            for item in document["backends"]
+            if item["backend_id"] in {"hpc.slurm", "cloud.batch", "qpu.physical"}
+        ):
+            raise SystemExit("clean-wheel inventory acceptance failed")
     print("clean-wheel acceptance passed")
 
 
