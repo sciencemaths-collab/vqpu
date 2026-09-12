@@ -36,7 +36,7 @@ def test_real_apple_gpu_output_replays_exactly():
     digest = plan(item)["plan_digest"]
     first = execute({"workload": item, "plan_digest": digest})
     second = execute({"workload": item, "plan_digest": digest})
-    assert first["output_bytes_digest"] == second["output_bytes_digest"]
+    assert first == second
 
 
 @pytest.mark.skipif(discover()["status"] != "AVAILABLE", reason="Apple Metal MLX unavailable")

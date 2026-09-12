@@ -7,7 +7,6 @@ import importlib.metadata
 import json
 import math
 import platform
-import time
 from collections.abc import Mapping
 from typing import Any, TypeGuard
 
@@ -37,12 +36,14 @@ def discover() -> dict[str, Any]:
 
             mlx_version = importlib.metadata.version("mlx")
             prior = mx.default_device()
-            mx.set_default_device(mx.gpu)
-            probe = mx.array([1.0], dtype=mx.float32) + 1
-            mx.eval(probe)
-            device = str(mx.default_device()).upper()
-            runtime_available = "GPU" in device
-            mx.set_default_device(prior)
+            try:
+                mx.set_default_device(mx.gpu)
+                probe = mx.array([1.0], dtype=mx.float32) + 1
+                mx.eval(probe)
+                device = str(mx.default_device()).upper()
+                runtime_available = "GPU" in device
+            finally:
+                mx.set_default_device(prior)
         except Exception:
             runtime_available = False
             device = "UNAVAILABLE"
@@ -102,16 +103,16 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
         import mlx.core as mx
 
         prior = mx.default_device()
-        mx.set_default_device(mx.gpu)
-        if "GPU" not in str(mx.default_device()).upper():
-            raise AcceleratorEngineError("MLX did not select the Apple GPU")
-        left, right = _operands(workload)
-        started = time.perf_counter_ns()
-        output = mx.matmul(mx.array(left), mx.array(right))
-        mx.eval(output)
-        elapsed = time.perf_counter_ns() - started
-        values = np.asarray(output, dtype=np.float32)
-        mx.set_default_device(prior)
+        try:
+            mx.set_default_device(mx.gpu)
+            if "GPU" not in str(mx.default_device()).upper():
+                raise AcceleratorEngineError("MLX did not select the Apple GPU")
+            left, right = _operands(workload)
+            output = mx.matmul(mx.array(left), mx.array(right))
+            mx.eval(output)
+            values = np.asarray(output, dtype=np.float32)
+        finally:
+            mx.set_default_device(prior)
     except AcceleratorEngineError:
         raise
     except Exception as exc:
@@ -134,7 +135,6 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
         "maximum_absolute_reference_error": maximum_error,
         "tolerance": workload["tolerance"],
         "reference_verified": maximum_error <= workload["tolerance"],
-        "elapsed_nanoseconds": elapsed,
         "device_class": "GPU",
         "runtime": "MLX",
         "network_used": False,
