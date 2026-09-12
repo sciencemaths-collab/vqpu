@@ -87,3 +87,7 @@ python_version = "3.12"
 strict = true
 files = ["vqpu/compute_engine.py", "vqpu/qualification.py", "vqpu/accelerator_engine.py", "vqpu/accelerator_qualification.py"]
 follow_imports = "skip"
+
+[[tool.mypy.overrides]]
+module = ["mlx", "mlx.*"]
+ignore_missing_imports = true
