@@ -1,7 +1,7 @@
 # vQPU — Universal Virtual Quantum Processing Unit
 
 **Author:** Bernard Essuman  
-**Version:** 0.4.3  
+**Version:** 0.5.0
 **License:** MIT  
 **Contact:** bessuman.academia@gmail.com
 
@@ -14,7 +14,9 @@ The package introduces two original contributions to the field:
 - **Circuit Knitting** with exact zero-overhead reconstruction for controlled-gate cuts, enabling circuits larger than any single backend to run across heterogeneous devices.
 - **Cryo-Canonical Basin Weaving (CCBW)**, a novel variational optimizer based on original research by Bernard Essuman, which uses structured 3-3+1 motif probing, mirror-balance symmetry certification, and cold-seeking spring-network optimization to navigate quantum parameter landscapes.
 
-vQPU has been validated with 33/33 tests passing across all modules and live-tested on IonQ's quantum cloud simulator with 320 circuit evaluations.
+The RAD Compute Engine boundary is validated by 11 automated tests and a 15-case formal local-CPU qualification. The two historical CHESSO suites also run 28 smoke programs. Prior IonQ simulator work is historical evidence only and is not a live-QPU qualification for version 0.5.0.
+
+Version 0.5.0 qualifies only deterministic local CPU quantum simulation. GPU, cloud, HPC, and physical QPU backends remain available research surfaces but are not qualified through the RAD Compute Engine contract.
 
 ---
 
@@ -41,6 +43,18 @@ vQPU has been validated with 33/33 tests passing across all modules and live-tes
 ---
 
 ## Installation
+
+The latest PyPI release is the earlier vQPU SDK line. Until 0.5.0 is explicitly published,
+install the RAD Compute Engine from a verified source checkout:
+
+```bash
+git clone https://github.com/sciencemaths-collab/vqpu.git
+cd vqpu
+python -m pip install .
+```
+
+The commands below install the published SDK and optional research backends; they do not by
+themselves qualify those backends for RAD Compute Engine execution.
 
 ```bash
 pip install vqpu-sdk

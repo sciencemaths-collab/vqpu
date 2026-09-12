@@ -85,9 +85,15 @@ from .cryo import (
     cryo_vqe,
 )
 
-from . import chesso
+def __getattr__(name):
+    """Load the optional CHESSO surface only when explicitly requested."""
+    if name == "chesso":
+        import importlib
 
-__version__ = "0.4.3"
+        return importlib.import_module("vqpu.chesso")
+    raise AttributeError(name)
+
+__version__ = "0.5.0"
 
 __all__ = [
     # core quantum primitives
