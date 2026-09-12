@@ -1,4 +1,4 @@
-# vQPU — Universal Virtual Quantum Processing Unit
+# vQPU — Governed Heterogeneous Compute and Quantum Simulation Fabric
 
 **Author:** Bernard Essuman  
 **Version:** 0.6.0
@@ -7,7 +7,11 @@
 
 ---
 
-vQPU is a quantum computing SDK that provides a universal abstraction layer across CPUs, GPUs (NVIDIA, AMD, Intel, Apple Silicon), TPUs, and cloud quantum processors (IonQ, IBM, Google, Rigetti, AWS Braket, Azure Quantum). Write a quantum circuit once, execute it on any available hardware, and let the framework handle backend discovery, routing, and optimization.
+vQPU is a research and engineering SDK for local quantum simulation, circuit construction,
+backend discovery, and qualified heterogeneous compute. It contains experimental adapters for
+several accelerator and cloud families, but it does **not** promise universal execution.
+Discovery means that a dependency or credential appears present; only a matching formal
+qualification makes a backend routable through RAD Compute Engine.
 
 The package introduces two original contributions to the field:
 
@@ -95,14 +99,14 @@ are supplied to RAD.
 ```python
 from vqpu import UniversalvQPU
 
-# Discovers all available backends automatically
+# Discovers locally detectable backend candidates
 qpu = UniversalvQPU()
 
 # Build a 4-qubit GHZ state
 circuit = qpu.circuit(4, "ghz")
 circuit.h(0).cnot(0, 1).cnot(1, 2).cnot(2, 3)
 
-# Execute on the best available backend
+# Execute through the SDK's local routing policy; this is not RAD qualification
 result = qpu.run(circuit, shots=1024)
 print(result.counts)
 # {'0000': 512, '1111': 512}
@@ -166,17 +170,17 @@ result = qpu.run(circuit, shots=2048)
 plan = qpu.plan(circuit)
 ```
 
-**Supported backends:**
+**Backend implementations and qualification state:**
 
-| Backend | Plugin | Detection |
+| Backend | Implementation | RAD-qualified workload |
 |---|---|---|
-| CPU | `CPUPlugin` | Always available (NumPy) |
-| NVIDIA GPU | `NvidiaGPUPlugin` | CUDA + cupy |
-| AMD GPU | `AMDGPUPlugin` | ROCm + cupy/torch |
-| Intel GPU | `IntelGPUPlugin` | XPU + intel_extension_for_pytorch |
-| Apple Silicon | `AppleSiliconPlugin` | MLX or torch MPS |
-| Google TPU | `TPUPlugin` | JAX on TPU |
-| Cloud QPU | `QPUCloudPlugin` | IonQ, IBM, Google, Rigetti, Azure, AWS |
+| CPU | `CPUPlugin` / `cpu.quantum_simulator` | Bounded local quantum simulation |
+| Apple Silicon | `apple.metal.mlx` | Bounded float32 matrix multiplication only |
+| NVIDIA, AMD, Intel GPU | Experimental discovery plugins | None |
+| Google TPU | Experimental discovery plugin | None |
+| IonQ simulator | Experimental cloud adapter; authenticated simulator qualification observed separately | None in the packaged RAD release |
+| Physical/cloud QPU | Experimental provider adapters | None |
+| Slurm and cloud batch | Fail-closed inventory entries | None |
 
 **Design principle:** No silent fallback. If a GPU plugin claims the work, it runs on the GPU or raises an error. The CPU never silently substitutes for a failed accelerator.
 
@@ -314,7 +318,10 @@ result = phantom.execute(circuit, shots=1024)
 
 ## Running on IonQ
 
-Execute quantum circuits on IonQ's trapped-ion quantum hardware or simulator through the vQPU link layer.
+The experimental IonQ adapter can submit circuits to targets enabled for the operator's project.
+The ideal cloud simulator has passed a separate authenticated five-case exercise, but that is not physical-QPU evidence and does not qualify IonQ execution in the packaged RAD Compute Engine.
+Physical execution is unavailable unless the IonQ account explicitly grants access, and must
+undergo its own cost, failure, accuracy, and cancellation qualification before RAD routing.
 
 **Setup:**
 
@@ -398,14 +405,9 @@ print(f"Certified basins: {len(result.graph.nodes)}")
 lm.close_all()
 ```
 
-**IonQ backend options:**
-
-| `target_backend` | Description | Cost |
-|---|---|---|
-| `"simulator"` | Ideal noiseless simulator | Free |
-| `"simulator"` with `noise_model="aria-1"` | Simulator with realistic Aria-1 noise | Free |
-| `"qpu.aria-1"` | IonQ Aria-1 trapped-ion QPU (25 qubits) | $0.01/shot |
-| `"qpu.forte-1"` | IonQ Forte-1 trapped-ion QPU (36 qubits) | $0.01/shot |
+Target names, availability, pricing, quotas, and access rules are controlled by IonQ and may
+change. Discover them from the authenticated provider rather than copying names or prices from
+this README. Selecting a target does not qualify it.
 
 To use a noise model:
 
@@ -488,24 +490,27 @@ Your application
 
 ## Original Contributions
 
-vQPU introduces several contributions that are not available in existing quantum computing frameworks:
+vQPU contains the following project-specific research implementations. These descriptions are
+engineering scope statements, not peer-reviewed novelty or superiority claims:
 
 | Contribution | Description |
 |---|---|
 | **Cryo-Canonical Basin Weaving** | A novel variational optimizer based on original research. Uses 3-3+1 motif probing to certify basins, mirror-balance to reject saddle points, and cold-seeking spring networks to navigate the landscape. Not a reimplementation of existing work. |
 | **Zero-overhead circuit knitting** | For controlled gates (CNOT, CZ) cut at the control wire, the Z-basis decomposition produces exact results with no sampling overhead. No quasi-probability penalty. |
 | **Phantom adaptive simulation** | Combines sparse statevectors, MPS, and product states in a single engine with dynamic re-splitting during execution. Subsystems are automatically promoted, demoted, merged, and split as entanglement evolves. |
-| **Universal backend abstraction** | True hardware-agnostic execution across CPU, GPU, TPU, and 6 cloud QPU providers through a single API. No silent fallback. |
+| **Backend abstraction** | A shared experimental interface across local and remote backend candidates, with qualified RAD routing limited to exact tested workloads and no silent fallback. |
 | **NVLink-inspired link layer** | Persistent authenticated connections with state-machine lifecycle, health monitoring, and credential isolation. |
-| **Heterogeneous circuit execution** | Circuit knitting combined with the link layer enables splitting a single circuit across GPU simulation and cloud QPU simultaneously. |
+| **Heterogeneous circuit planning** | Circuit knitting and the link layer can describe mixed-backend dispatch; each concrete execution combination requires separate qualification. |
 
 ---
 
 ## Validation Results
 
-All modules have been validated and the package has been live-tested on quantum cloud infrastructure.
+Validation is capability-specific. Passing local tests does not establish physical-QPU,
+cross-provider, performance, scientific-novelty, or production qualification.
 
-**Unit validation: 33/33 tests passing**
+The current authoritative test count is produced by CI; historical module counts below describe
+the original research suite and must not be treated as current release qualification.
 
 | Module | Tests | Result |
 |---|---|---|
@@ -514,14 +519,12 @@ All modules have been validated and the package has been live-tested on quantum 
 | Knit (circuit cutting, reconstruction, TVD) | 8 | All pass |
 | Cryo (CCBW optimizer, QAOA, VQE) | 6 | All pass |
 
-**IonQ cloud live test:**
+**Historical IonQ simulator experiment (not physical hardware qualification):**
 
-- Backend: IonQ quantum simulator (36-qubit trapped-ion)
+- Backend: IonQ ideal cloud simulator, not trapped-ion hardware
 - Problem: 4-qubit weighted Max-Cut (5 edges)
 - Total circuit evaluations: 320
-- Approximation ratio: 89%
-- Optimal bitstring hit rate: 72% of measurement shots
-- Wall time: 41 minutes (cloud API latency)
+- These historical outcome figures are not used by the current RAD qualification boundary.
 
 **Circuit knitting verification:**
 
