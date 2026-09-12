@@ -11,6 +11,7 @@ from collections.abc import Mapping
 from typing import Any, TypeGuard
 
 import numpy as np
+from numpy.typing import NDArray
 
 ENGINE_ID = "rad-compute-engine"
 ENGINE_VERSION = "0.6.0"
@@ -201,7 +202,7 @@ def _workload(value: object) -> dict[str, Any]:
     }
 
 
-def _operands(workload: Mapping[str, Any]) -> tuple[np.ndarray, np.ndarray]:
+def _operands(workload: Mapping[str, Any]) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
     generator = np.random.default_rng(workload["seed"])
     left = generator.uniform(-1, 1, (workload["rows"], workload["inner"])).astype(np.float32)
     right = generator.uniform(-1, 1, (workload["inner"], workload["columns"])).astype(np.float32)
