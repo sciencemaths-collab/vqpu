@@ -1,4 +1,6 @@
-"""`python -m vqpu` — auto-discovery + demo on the fastest backend available."""
+"""vQPU command line interface."""
+
+import argparse
 
 import numpy as np
 
@@ -6,6 +8,17 @@ from .universal import UniversalvQPU
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="vQPU local quantum compute fabric")
+    subparsers = parser.add_subparsers(dest="command")
+    subparsers.add_parser("demo", help="run explicit local discovery and simulator demonstrations")
+    args = parser.parse_args()
+    if args.command is None:
+        parser.print_help()
+        return
+    _demo()
+
+
+def _demo() -> None:
     print("╔" + "═" * 60 + "╗")
     print("║  vQPU — Universal Virtual Quantum Processing Unit          ║")
     print("║  Probing host for every available compute backend…         ║")
@@ -26,7 +39,7 @@ def main() -> None:
     c.h(0).cnot(0, 1)
     r = c and qpu.run(c, shots=2048)
     print(f"  counts: {r.counts}")
-    print(f"  backend: {r.backend_name}   time: {r.execution_time*1000:.1f}ms")
+    print(f"  backend: {r.backend_name}   time: {r.execution_time * 1000:.1f}ms")
 
     # ── Demo 2: GHZ-10 (verifies entanglement across many qubits) ─────
     print("\n" + "─" * 62)
@@ -57,10 +70,11 @@ def main() -> None:
         c3.ry(i, np.pi / 4)
     plan = qpu.plan(c3)
     for phase in plan["phases"]:
-        print(f"    {phase['phase']:12s} → {phase['assigned_to']:28s} "
-              f"~{phase['est_time_ms']:.2f}ms  ({phase['description']})")
-    print(f"\n  hybrid: {plan['is_hybrid']}   "
-          f"total est.: {plan['total_est_time_ms']:.1f}ms")
+        print(
+            f"    {phase['phase']:12s} → {phase['assigned_to']:28s} "
+            f"~{phase['est_time_ms']:.2f}ms  ({phase['description']})"
+        )
+    print(f"\n  hybrid: {plan['is_hybrid']}   total est.: {plan['total_est_time_ms']:.1f}ms")
 
     # ── Backend registry summary ──────────────────────────────────────
     print("\n" + "─" * 62)

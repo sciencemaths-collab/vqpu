@@ -1,0 +1,42 @@
+name: qualify
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  test:
+    name: test (${{ matrix.python-version }})
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.14"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: uv sync --locked --extra test
+      - run: uv run ruff format --check vqpu/compute_engine.py vqpu/qualification.py vqpu/__main__.py tests
+      - run: uv run ruff check vqpu/compute_engine.py vqpu/qualification.py vqpu/__main__.py tests
+      - run: uv run mypy
+      - run: uv run pytest -q
+      - run: uv run python chesso_vqpu/run_all_smoke_tests.py
+      - run: uv run python vqpu/chesso/run_all_smoke_tests.py
+      - run: uv run pip-audit --progress-spinner=off
+      - run: uv build
+      - run: uv run python -m vqpu.qualification --output artifacts/qualification.json
+      - run: uv run python scripts/clean_wheel_acceptance.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compute-qualification-${{ matrix.python-version }}
+          path: artifacts/qualification.json
+  qualify:
+    name: qualify
+    if: always()
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - run: test '${{ needs.test.result }}' = 'success'
