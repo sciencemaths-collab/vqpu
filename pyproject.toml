@@ -7,7 +7,7 @@ name = "vqpu-sdk"
 version = "0.5.0"
 description = "Qualified local compute engine with vQPU quantum fabric."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.15"
 license = "MIT"
 authors = [
     { name = "Bernard Essuman", email = "bessuman.academia@gmail.com" },
@@ -18,7 +18,8 @@ keywords = [
     "quantum algorithms", "QPU", "GPU", "quantum compiler",
 ]
 dependencies = [
-    "numpy>=1.22",
+    "numpy>=1.22; python_version < '3.14'",
+    "numpy>=2.3; python_version >= '3.14'",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -46,7 +47,7 @@ test = ["build>=1.3", "matplotlib>=3.7", "mypy>=1.18", "pip-audit>=2.9", "pytest
 # Hardware backends — install only what you have.
 cuda   = ["cupy-cuda12x"]
 cuda11 = ["cupy-cuda11x"]
-rocm   = ["cupy-rocm-5-0"]
+rocm   = ["cupy-rocm-5-0; python_version < '3.14'"]
 apple  = ["mlx"]
 intel  = ["torch", "intel-extension-for-pytorch"]
 tpu    = ["jax[tpu]"]
