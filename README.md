@@ -13,10 +13,13 @@ several accelerator and cloud families, but it does **not** promise universal ex
 Discovery means that a dependency or credential appears present; only a matching formal
 qualification makes a backend routable through RAD Compute Engine.
 
-The package introduces two original contributions to the field:
+The package includes two experimental research implementations:
 
-- **Circuit Knitting** with exact zero-overhead reconstruction for controlled-gate cuts, enabling circuits larger than any single backend to run across heterogeneous devices.
-- **Cryo-Canonical Basin Weaving (CCBW)**, a novel variational optimizer based on original research by Bernard Essuman, which uses structured 3-3+1 motif probing, mirror-balance symmetry certification, and cold-seeking spring-network optimization to navigate quantum parameter landscapes.
+- **Circuit Knitting** with exact reconstruction for the tested controlled-gate-cut cases. This is
+  not a general claim for arbitrary circuits, cuts, noise models, or backend combinations.
+- **Cryo-Canonical Basin Weaving (CCBW)**, an experimental variational optimizer that uses
+  structured motif probing, mirror-balance scoring, and spring-network refinement. Its present
+  evidence is software-test and benchmark evidence, not peer-reviewed superiority evidence.
 
 The RAD Compute Engine boundary includes independently qualified local CPU quantum simulation and
 Apple Metal float32 matrix multiplication. The two historical CHESSO suites also run 28 smoke
@@ -33,7 +36,7 @@ attested. Backend-family discovery never qualifies a backend by availability alo
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Core Capabilities](#core-capabilities)
-- [Universal Backend Discovery](#universal-backend-discovery)
+- [Backend Discovery](#backend-discovery)
 - [Circuit Knitting](#circuit-knitting)
 - [Cryo-Canonical Basin Weaving Optimizer](#cryo-canonical-basin-weaving-optimizer)
 - [Phantom Adaptive Simulator](#phantom-adaptive-simulator)
@@ -149,9 +152,12 @@ result = qpu.run(ansatz, shots=512)
 
 ---
 
-## Universal Backend Discovery
+## Backend Discovery
 
-The `universal` module probes every backend at startup, fingerprints their capabilities, and routes circuits to the most suitable device.
+The historically named `universal` module probes supported backend candidates and records detected
+capabilities. Its local SDK policy can select among detected implementations; governed RAD routing
+requires a separate, matching qualification record. Detection is not proof of availability,
+correctness, performance, cost suitability, or production readiness.
 
 ```python
 from vqpu import UniversalvQPU
@@ -161,7 +167,7 @@ qpu = UniversalvQPU()
 #   [cpu] CPU(8cores)          ONLINE  27qb
 #   [gpu] GPU::AppleSilicon    ONLINE  27qb
 
-# Build a circuit — it runs on the best backend automatically
+# Build a circuit — local SDK policy selects an eligible detected backend
 circuit = qpu.circuit(5, "test")
 circuit.h(0).cnot(0, 1).cnot(1, 2).cnot(2, 3).cnot(3, 4)
 result = qpu.run(circuit, shots=2048)
@@ -188,7 +194,9 @@ plan = qpu.plan(circuit)
 
 ## Circuit Knitting
 
-Split circuits that exceed any single backend's capacity across multiple devices, then reconstruct the full probability distribution.
+Partition supported circuits into fragments and reconstruct results for the implemented cut types.
+The verified exactness claims are limited to the documented controlled-gate cases and test
+conditions; arbitrary circuits and mixed physical backends require independent validation.
 
 ```python
 from vqpu import UniversalvQPU, CutFinder, CircuitKnitter
@@ -206,14 +214,17 @@ plan = CutFinder.auto_partition(circuit, max_fragment_qubits=5)
 print(f"Partitions: {[sorted(p) for p in plan.partitions]}")
 print(f"Cuts: {plan.n_cuts}")
 
-# Execute fragments independently, reconstruct exact result
+# Execute fragments independently; exactness is limited to supported cut cases
 knitter = CircuitKnitter(plan)
 result = knitter.run(executor=qpu.run, shots=4096)
 print(result.counts)
 # {'0000000000': 2048, '1111111111': 2048}
 ```
 
-**How it works:** For controlled gates (CNOT, CZ) cut at the control wire, the Z-basis decomposition is exact. The upstream fragment measures the control qubit normally; its value determines the downstream preparation. This produces the correct joint distribution with zero sampling overhead — no quasi-probability decomposition, no 4^k penalty.
+**How it works:** For the implemented CNOT/CZ control-wire cuts, the Z-basis decomposition avoids
+the quasi-probability sampling overhead used by some general cutting methods. Exact reconstruction
+has been verified only for the packaged deterministic and sampling tests; it must not be generalized
+to unsupported gates, cut locations, noise, or independently operated hardware.
 
 You can also specify partitions manually:
 
@@ -232,7 +243,10 @@ result = knitter.run_heterogeneous(link_manager=lm, prefer={0: ["gpu"], 1: ["ion
 
 ## Cryo-Canonical Basin Weaving Optimizer
 
-An original variational optimization technique developed by Bernard Essuman. Based on published research combining spherical probing, 3-3+1 canonical reduction, and cold-seeking spring-network optimization.
+An experimental variational optimization technique developed by Bernard Essuman. The repository
+implements spherical probing, motif reduction, and cold-seeking spring-network refinement. Results
+depend on objective, budget, seed, noise, and configuration; the optimizer does not guarantee a
+global optimum or superiority over established methods.
 
 ```python
 from vqpu import UniversalvQPU
@@ -274,7 +288,10 @@ print(f"Total evaluations: {result.n_evaluations}")
 5. **Spring graph** — certified basins are connected into a graph with Gaussian-kernel edges weighted by temperature (cold nodes attract, hot nodes repel).
 6. **Cold-seeking refinement** — gradient descent on the coldest (most stable, noise-tolerant) basins.
 
-**Why this matters for quantum computing:** Standard VQE/QAOA optimizers use blind gradient descent from random starting points, frequently landing in barren plateaus or noise-sensitive sharp minima. CCBW maps the landscape structure first, rejects unstable points, and preferentially refines flat, symmetric basins that remain valid on real noisy hardware.
+**Intended use:** CCBW provides another testable search strategy for variational experiments. It
+scores local symmetry and stability before refinement. Whether that helps a particular VQE/QAOA
+workload—including on noisy hardware—must be established by comparative benchmarks for that exact
+workload and backend.
 
 **Convenience wrappers:**
 
@@ -329,19 +346,25 @@ undergo its own cost, failure, accuracy, and cancellation qualification before R
 pip install vqpu-sdk[ionq]
 ```
 
-Get an API key from [IonQ Cloud](https://cloud.ionq.com) (sign up, go to API Keys, create one).
+Provide credentials at runtime through an environment variable or a configured secret manager.
+Never place a real key in source code, notebooks, logs, or committed configuration.
+
+```bash
+export IONQ_API_KEY='replace-with-a-temporary-or-managed-secret'
+```
 
 **Example: Run a GHZ state on IonQ's simulator**
 
 ```python
 from vqpu.link import LinkManager, QuantumTask
+import os
 
 # 1. Connect to IonQ
 lm = LinkManager()
 lm.forge_ionq(
     "ionq",
-    api_key="your-ionq-api-key-here",
-    target_backend="simulator",     # free cloud simulator
+    api_key=os.environ["IONQ_API_KEY"],
+    target_backend="simulator",
 )
 
 # 2. Build a gate sequence
@@ -367,10 +390,11 @@ lm.close_all()
 ```python
 from vqpu.link import LinkManager, QuantumTask
 from vqpu import CryoOptimizer, CryoConfig, QuantumCircuit, ExecutionResult
+import os
 
 # Connect
 lm = LinkManager()
-lm.forge_ionq("ionq", api_key="your-ionq-api-key-here", target_backend="simulator")
+lm.forge_ionq("ionq", api_key=os.environ["IONQ_API_KEY"], target_backend="simulator")
 
 # Wrap the link as an executor for the optimizer
 def ionq_executor(circuit, shots):
@@ -412,18 +436,21 @@ this README. Selecting a target does not qualify it.
 To use a noise model:
 
 ```python
-lm.forge_ionq("ionq", api_key="your-key", target_backend="simulator", noise_model="aria-1")
+lm.forge_ionq("ionq", api_key=os.environ["IONQ_API_KEY"], target_backend="simulator", noise_model="aria-1")
 ```
 
 ---
 
 ## Persistent Link Layer
 
-NVLink-inspired persistent connections to quantum backends with authentication, health monitoring, and automatic routing.
+Managed connection objects for supported quantum backends, with authentication, health monitoring,
+and explicit preference-based selection. This software layer is not NVIDIA NVLink and makes no
+claim of equivalent transport performance or semantics.
 
 ```python
 from vqpu.link import LinkManager, QuantumTask
 from vqpu import CPUPlugin
+import os
 
 lm = LinkManager()
 
@@ -431,7 +458,7 @@ lm = LinkManager()
 lm.forge_local("cpu", CPUPlugin())
 
 # Cloud backend
-lm.forge_ionq("ionq", api_key="your-key", target_backend="simulator")
+lm.forge_ionq("ionq", api_key=os.environ["IONQ_API_KEY"], target_backend="simulator")
 
 # Submit — LinkManager routes to the best matching link
 task = QuantumTask(n_qubits=4, gate_sequence=[("H", [0]), ("CNOT", [0, 1])], shots=1024)
@@ -451,13 +478,17 @@ lm.close_all()
 
 ## CHESSO Compiler
 
-A control stack for quantum algorithm compilation, featuring the Q-lambda language frontend, hypergraph entanglement compilation, and a hardware bridge for translating compiled execution plans into native gate sequences for any backend.
+An experimental control stack for quantum algorithm compilation, featuring the Q-lambda language
+frontend, hypergraph entanglement compilation, and translation hooks. A backend requires a concrete
+adapter and its own validation; CHESSO does not translate to every backend by default.
 
 ```python
 from vqpu import chesso
 ```
 
-The CHESSO subsystem includes 685 test files covering gate operations, compilation paths, and quantum algorithm experiments including AEGIS-Ion protein folding, TSP, and MaxCut QAOA benchmarks.
+The repository includes historical CHESSO smoke programs and experiments covering gate operations,
+compilation paths, and example optimization workloads. These are research fixtures, not validation
+of scientific accuracy, useful protein folding, industrial optimization, or hardware performance.
 
 ---
 
@@ -495,8 +526,8 @@ engineering scope statements, not peer-reviewed novelty or superiority claims:
 
 | Contribution | Description |
 |---|---|
-| **Cryo-Canonical Basin Weaving** | A novel variational optimizer based on original research. Uses 3-3+1 motif probing to certify basins, mirror-balance to reject saddle points, and cold-seeking spring networks to navigate the landscape. Not a reimplementation of existing work. |
-| **Zero-overhead circuit knitting** | For controlled gates (CNOT, CZ) cut at the control wire, the Z-basis decomposition produces exact results with no sampling overhead. No quasi-probability penalty. |
+| **Cryo-Canonical Basin Weaving** | An experimental variational optimizer using motif probing, mirror-balance scoring, and spring-network refinement. No global-optimum or superiority guarantee. |
+| **Controlled-gate circuit knitting** | For packaged CNOT/CZ control-wire cases, the implemented decomposition avoids quasi-probability sampling overhead. Other cuts and execution environments need separate validation. |
 | **Phantom adaptive simulation** | Combines sparse statevectors, MPS, and product states in a single engine with dynamic re-splitting during execution. Subsystems are automatically promoted, demoted, merged, and split as entanglement evolves. |
 | **Backend abstraction** | A shared experimental interface across local and remote backend candidates, with qualified RAD routing limited to exact tested workloads and no silent fallback. |
 | **NVLink-inspired link layer** | Persistent authenticated connections with state-machine lifecycle, health monitoring, and credential isolation. |
@@ -537,7 +568,7 @@ the original research suite and must not be treated as current release qualifica
 
 - **Circuit knitting engine** (`knit.py`) — topology-aware partitioning, exact Z-basis reconstruction for CNOT/CZ cuts, heterogeneous backend dispatch
 - **Cryo-Canonical Basin Weaving optimizer** (`cryo.py`) — 3-3+1 motif probing, mirror-balance certification, cold-seeking refinement, `cryo_qaoa()` and `cryo_vqe()` convenience functions
-- **IonQ live validation** — 320 circuit evaluations on IonQ's quantum cloud simulator
+- **Historical IonQ simulator exercise** — 320 circuit evaluations on an authenticated cloud simulator; not physical-hardware or current RAD qualification
 - **Version bump to 0.4.0** — updated exports, pyproject.toml metadata, professional packaging
 
 ---
@@ -549,7 +580,7 @@ the original research suite and must not be treated as current release qualifica
 | Export | Type | Description |
 |---|---|---|
 | `vQPU` | class | Simple quantum processor with local simulator |
-| `UniversalvQPU` | class | Auto-discovering multi-backend processor |
+| `UniversalvQPU` | class | Historically named processor with supported-backend discovery and local policy routing |
 | `QuantumCircuit` | class | Chainable circuit builder |
 | `QuantumRegister` | class | N-qubit amplitude state vector |
 | `GateLibrary` | class | Standard gate matrices (H, X, Y, Z, CNOT, etc.) |
