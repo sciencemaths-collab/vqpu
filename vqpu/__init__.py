@@ -93,7 +93,7 @@ def __getattr__(name):
         return importlib.import_module("vqpu.chesso")
     raise AttributeError(name)
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 __all__ = [
     # core quantum primitives

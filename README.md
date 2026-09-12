@@ -1,7 +1,7 @@
 # vQPU — Universal Virtual Quantum Processing Unit
 
 **Author:** Bernard Essuman  
-**Version:** 0.5.0
+**Version:** 0.6.0
 **License:** MIT  
 **Contact:** bessuman.academia@gmail.com
 
@@ -14,9 +14,13 @@ The package introduces two original contributions to the field:
 - **Circuit Knitting** with exact zero-overhead reconstruction for controlled-gate cuts, enabling circuits larger than any single backend to run across heterogeneous devices.
 - **Cryo-Canonical Basin Weaving (CCBW)**, a novel variational optimizer based on original research by Bernard Essuman, which uses structured 3-3+1 motif probing, mirror-balance symmetry certification, and cold-seeking spring-network optimization to navigate quantum parameter landscapes.
 
-The RAD Compute Engine boundary is validated by 11 automated tests and a 15-case formal local-CPU qualification. The two historical CHESSO suites also run 28 smoke programs. Prior IonQ simulator work is historical evidence only and is not a live-QPU qualification for version 0.5.0.
+The RAD Compute Engine boundary includes independently qualified local CPU quantum simulation and
+Apple Metal float32 matrix multiplication. The two historical CHESSO suites also run 28 smoke
+programs. Prior IonQ simulator work is historical evidence only and is not a live-QPU qualification.
 
-Version 0.5.0 qualifies only deterministic local CPU quantum simulation. GPU, cloud, HPC, and physical QPU backends remain available research surfaces but are not qualified through the RAD Compute Engine contract.
+Version 0.6.0 adds a 15-case qualification for the actual Apple Metal GPU through MLX. Other GPU
+vendors, cloud, HPC, and physical QPU backends remain unroutable until separately benchmarked and
+attested. Backend-family discovery never qualifies a backend by availability alone.
 
 ---
 
@@ -44,7 +48,7 @@ Version 0.5.0 qualifies only deterministic local CPU quantum simulation. GPU, cl
 
 ## Installation
 
-The latest PyPI release is the earlier vQPU SDK line. Until 0.5.0 is explicitly published,
+The latest PyPI release is the earlier vQPU SDK line. Until 0.6.0 is explicitly published,
 install the RAD Compute Engine from a verified source checkout:
 
 ```bash
@@ -67,11 +71,22 @@ pip install vqpu-sdk[apple]          # + MLX for Apple Silicon GPU
 pip install vqpu-sdk[cuda]           # + cupy for NVIDIA GPU
 pip install vqpu-sdk[ionq]           # + qiskit + qiskit-ionq for IonQ cloud QPU
 pip install vqpu-sdk[ibm]            # + qiskit + qiskit-ibm-runtime for IBM Quantum
-pip install vqpu-sdk[all-qpu]        # + all cloud QPU drivers
-pip install vqpu-sdk[all-classical]  # + all local GPU/TPU drivers
 ```
 
-You can combine multiple extras: `pip install vqpu-sdk[ionq,apple]`
+Install only the backend extras actually used on the target host. Accelerator runtimes are not a
+portable bundle: CUDA, ROCm, Apple Metal, Intel XPU, and TPU packages have mutually exclusive
+platform requirements. Installing a driver does not qualify its backend.
+
+Inspect the governed inventory or formally qualify an Apple Metal host:
+
+```bash
+vqpu inventory
+vqpu qualify-apple --output apple-metal-qualification.json
+```
+
+Inventory reports CPU, Apple GPU, Slurm HPC, cloud batch, and physical QPU families. HPC, cloud,
+and physical QPU entries always remain unroutable until an exact adapter benchmark and attestation
+are supplied to RAD.
 
 ---
 
